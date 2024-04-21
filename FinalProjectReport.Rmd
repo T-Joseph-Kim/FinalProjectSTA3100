@@ -1,0 +1,35 @@
+---
+title: "Final Project: Analyzing Suicide Mortality Trends by Demographic Factors"
+author: "by Joseph Kim and Jun Tianzhong"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+![Suicide Rate by County in the United States in 2016.](SuicideRatebyCounty.png){#id .class width="100%" height="100%" style="display: block; margin: 0 auto;"}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse", repos='http://cran.us.r-project.org')
+library(tidyverse)
+```
+
+\newpage
+
+# Abstract
+
+# Introduction
+
+|     Understanding the dynamics of suicide rates across demographic categories is paramount in addressing the complexities of mental health and societal well-being. Over the decades, the United States has witnessed fluctuations in suicide rates (increased trend), influenced by a multitude of factors including societal changes, economic conditions, and mental health awareness. The exploration of these trends sheds light on the historical patterns of suicide but also guides targeted interventions and awareness to mitigate risk factors associated with suicide.
+
+|     Recent years we have seen a growing recognition of the urgency to address mental health issues, including suicide prevention, at both the nation and global level. With increasing awareness, there has been an increase in research efforts aimed to dissecting the interrelationship between demographic variables and suicide rates.This includes the examination of disparities across sex, race, Hispanic origin, and age groups, acknowledging the nuanced experiences and demographic categories that are the most vulnerable.
+
+|     With a data set provided by the U.S. Department of Health & Human Services titled "Death rates for suicide, by sex, race, Hispanic origin, and age: United States", this study seeks to contribute to this ongoing research by comprehensively analyzing death rates for suicide in the United States spanning nearly seven decades, from 1950 to 2018. By analyzing into historical data, we aim to discern long-term trends and identify significant shifts in suicide rates among different demographic groups. Moreover, we want to uncover potential underlying factors contributing to these trends, informing targeted interventions and policy initiatives tailored to address the unique needs of diverse populations like the United States. In essence, we aspire to contribute towards fostering a society that has increased mental health awareness through this research.
+
+
+# Conclusion
+
+# Team Contribution Statement
