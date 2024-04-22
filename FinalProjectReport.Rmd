@@ -54,6 +54,28 @@ deathRate.summary
 # filter(STUB_LABEL %in% categories[1], AGE %in% ages[1])
 ```
 
+```{r}
+sexDeathRate <- data %>%
+  filter(STUB_NAME %in% demoFactor[2])
+male_death_rates <- sexDeathRate %>%
+  filter(STUB_LABEL == "Male")
+female_death_rates <- sexDeathRate %>%
+  filter(STUB_LABEL == "Female")
+
+sex_death_rate_plot <- ggplot() +
+  geom_line(data = male_death_rates, aes(x = YEAR, y = ESTIMATE, color = "Male")) +
+  geom_line(data = female_death_rates, aes(x = YEAR, y = ESTIMATE, color = "Female")) +
+  labs(x = "Year", y = "Deaths per 100,000 resident population", color = "Sex") +
+  ggtitle("Male vs Female Death Rates from Suicide (1960-2018)") +
+  scale_color_manual(values = c("blue", "red")) + 
+  theme_minimal()
+
+sex_death_rate_plot
+
+
+
+```
+
 # Conclusion
 
 # Team Contribution Statement
