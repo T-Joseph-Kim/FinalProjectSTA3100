@@ -107,9 +107,10 @@ sex_death_rate_plot <- ggplot() +
   geom_line(data = female_death_rates, aes(x = YEAR, y = ESTIMATE, color = "Female")) +
   labs(x = "Year", y = "Deaths per 100,000 resident population", color = "Sex") +
   ggtitle("Male vs Female Death Rates from Suicide (1960-2018)") +
-  scale_color_manual(values = c("blue", "red")) + 
+  scale_color_manual(values = c("blue", "red")) +
   theme_minimal()
 
+ggsave("MaleVSFemale.pdf", sex_death_rate_plot)
 sex_death_rate_plot
 
 ```
