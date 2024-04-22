@@ -39,17 +39,57 @@ demoCategory <- unique(data$STUB_LABEL)
 ages <- unique(data$AGE)
 years <- unique(data$YEAR)
 demoFactor <- unique(data$STUB_NAME)
-demoFactor
 
 summaryDeathRate <- data %>%
   filter(STUB_NAME %in% demoFactor[1])
 
 deathRate.summary <- ggplot(summaryDeathRate, aes(x = YEAR, y = ESTIMATE)) +
   geom_line() +
-  labs(x = "Year", y = "Deaths per 100,000 resident population") +
-  ggtitle("Death Rate")
+  labs(x = "Year", y = "Deaths per 100,000 Resident Population") +
+  ggtitle("Death Rate Summary")
 
-deathRate.summary
+ggsave("deathSummary.pdf", deathRate.summary)
+
+srDeathRate <- data %>% 
+  filter(STUB_NAME %in% demoFactor[3])
+
+deathRate.sexRace <- ggplot(srDeathRate, aes(x = STUB_LABEL, y = ESTIMATE)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  labs(x = "Sex-Race", y = "Deaths per 100,000 Resident Population") +
+  ggtitle("Cumulative Death Count")
+
+ggsave("CumulativeDeath.pdf", deathRate.sexRace)
+
+srhDeathRate <- data %>% 
+  filter(STUB_NAME %in% demoFactor[4])
+
+hispanicOrigin<- c("Female: Hispanic or Latino: All races","Male: Hispanic or Latino: All races")
+HispanicMaleDeathRate <- srhDeathRate %>%
+  filter(STUB_LABEL %in% hispanicOrigin[1]) 
+HispanicFemaleDeathRate <- srhDeathRate %>% 
+  filter(STUB_LABEL %in% hispanicOrigin[2])
+
+deathRate.hispanic <- ggplot() +
+  geom_line(data = HispanicMaleDeathRate, aes(x = YEAR, y = ESTIMATE, color = "Male")) +
+  geom_line(data = HispanicFemaleDeathRate, aes(x = YEAR, y = ESTIMATE, color = "Female")) +
+  labs(x = "Year", y = "Deaths per 100,000 Resident Population") +
+  ggtitle("Death Rate of Hispanic Origin")
+
+ggsave("HispanicDeath.pdf", deathRate.hispanic)
+
+
+nonHispanicDeathRate <- srhDeathRate %>%
+  filter(!(STUB_LABEL %in% hispanicOrigin))
+
+deathRate.nonHispanic <- ggplot(nonHispanicDeathRate, aes(x = STUB_LABEL, y = ESTIMATE)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  labs(x = "Sex-Race", y = "Deaths per 100,000 Resident Population") +
+  ggtitle("Non-Hispanic Origin: Cumulative Death Count")
+
+ggsave("NonHispanicDeath.pdf", deathRate.nonHispanic)
+
 # subset_data <- data %>%
 # filter(STUB_LABEL %in% categories[1], AGE %in% ages[1])
 ```
@@ -71,8 +111,6 @@ sex_death_rate_plot <- ggplot() +
   theme_minimal()
 
 sex_death_rate_plot
-
-
 
 ```
 
