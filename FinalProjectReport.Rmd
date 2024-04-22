@@ -124,8 +124,6 @@ ggsave("deathByGender.pdf", sex_death_rate_plot)
 ```{r}
 df <- data.frame(age = character(), race = character(), hispanic_origin = character(), sex = character(), death = numeric())
 
-string <- row$STUB_LABEL
-split <- strsplit(string, ":")
 for (i in 1:nrow(ageDeathRate)) {
   row <- ageDeathRate[i, ]
   df[i, "age"] <- row$AGE
