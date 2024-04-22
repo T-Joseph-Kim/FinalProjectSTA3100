@@ -8,13 +8,15 @@ editor_options:
     wrap: 72
 ---
 
-![Suicide Rate by County in the United States in 2016.](SuicideRatebyCounty.png){#id .class width="100%" height="100%" style="display: block; margin: 0 auto;"}
-
+![Suicide Rate by County in the United States in
+2016.](SuicideRatebyCounty.png){#id .class width="100%" height="100%"
+style="display: block; margin: 0 auto;"}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-install.packages("tidyverse", repos='http://cran.us.r-project.org')
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 library(tidyverse)
+library(dplyr)
 ```
 
 \newpage
@@ -29,6 +31,28 @@ library(tidyverse)
 
 |     With a data set provided by the U.S. Department of Health & Human Services titled "Death rates for suicide, by sex, race, Hispanic origin, and age: United States", this study seeks to contribute to this ongoing research by comprehensively analyzing death rates for suicide in the United States spanning nearly seven decades, from 1950 to 2018. By analyzing into historical data, we aim to discern long-term trends and identify significant shifts in suicide rates among different demographic groups. Moreover, we want to uncover potential underlying factors contributing to these trends, informing targeted interventions and policy initiatives tailored to address the unique needs of diverse populations like the United States. In essence, we aspire to contribute towards fostering a society that has increased mental health awareness through this research.
 
+# Data Analysis
+
+```{r}
+data <- read_csv("Dataset/deathRates.csv", show_col_types = F)
+demoCategory <- unique(data$STUB_LABEL)
+ages <- unique(data$AGE)
+years <- unique(data$YEAR)
+demoFactor <- unique(data$STUB_NAME)
+demoFactor
+
+summaryDeathRate <- data %>%
+  filter(STUB_NAME %in% demoFactor[1])
+
+deathRate.summary <- ggplot(summaryDeathRate, aes(x = YEAR, y = ESTIMATE)) +
+  geom_line() +
+  labs(x = "Year", y = "Deaths per 100,000 resident population") +
+  ggtitle("Death Rate")
+
+deathRate.summary
+# subset_data <- data %>%
+# filter(STUB_LABEL %in% categories[1], AGE %in% ages[1])
+```
 
 # Conclusion
 
