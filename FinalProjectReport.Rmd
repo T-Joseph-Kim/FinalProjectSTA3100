@@ -64,11 +64,14 @@ ggsave("CumulativeDeath.pdf", deathRate.sexRace)
 srhDeathRate <- data %>% 
   filter(STUB_NAME %in% demoFactor[4])
 
+ageDeathRate <- data %>%
+  filter(STUB_NAME %in% demoFactor[10])
+
 hispanicOrigin<- c("Female: Hispanic or Latino: All races","Male: Hispanic or Latino: All races")
 HispanicMaleDeathRate <- srhDeathRate %>%
-  filter(STUB_LABEL %in% hispanicOrigin[1]) 
+  filter(STUB_LABEL %in% hispanicOrigin[2]) 
 HispanicFemaleDeathRate <- srhDeathRate %>% 
-  filter(STUB_LABEL %in% hispanicOrigin[2])
+  filter(STUB_LABEL %in% hispanicOrigin[1])
 
 deathRate.hispanic <- ggplot() +
   geom_line(data = HispanicMaleDeathRate, aes(x = YEAR, y = ESTIMATE, color = "Male")) +
@@ -90,8 +93,13 @@ deathRate.nonHispanic <- ggplot(nonHispanicDeathRate, aes(x = STUB_LABEL, y = ES
 
 ggsave("NonHispanicDeath.pdf", deathRate.nonHispanic)
 
-# subset_data <- data %>%
-# filter(STUB_LABEL %in% categories[1], AGE %in% ages[1])
+deathRate.age <- ggplot(ageDeathRate, aes(x = AGE, y = ESTIMATE)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  labs(x = "Age", y = "Deaths per 100,000 Resident Population") +
+  ggtitle("Cumulative Deaths Count by Age Groups")
+
+ggsave("ageDeath.pdf", deathRate.age)
 ```
 
 ```{r}
@@ -110,8 +118,26 @@ sex_death_rate_plot <- ggplot() +
   scale_color_manual(values = c("blue", "red")) + 
   theme_minimal()
 
-sex_death_rate_plot
+ggsave("deathByGender.pdf", sex_death_rate_plot)
+```
 
+```{r}
+df <- data.frame(age = character(), race = character(), hispanic_origin = character(), sex = character(), death = numeric())
+
+string <- row$STUB_LABEL
+split <- strsplit(string, ":")
+for (i in 1:nrow(ageDeathRate)) {
+  row <- ageDeathRate[i, ]
+  df[i, "age"] <- row$AGE
+  string <- row$STUB_LABEL
+  split <- strsplit(string, ":")
+  df[i, "sex"] <- trimws(split[[1]][1])
+  df[i, "race"] <- trimws(split[[1]][3])
+  df[i, "hispanic_origin"] <- trimws(split[[1]][2])
+  df[i, "death"] <- row$ESTIMATE
+}
+
+df
 ```
 
 # Conclusion
