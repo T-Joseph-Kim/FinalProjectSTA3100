@@ -138,6 +138,11 @@ for (i in 1:nrow(ageDeathRate)) {
 df
 ```
 
+```{r}
+anova_result <- aov(death ~ age + race + hispanic_origin + sex, data = df)
+summary(anova_result)
+```
+
 # Conclusion
 
 # Team Contribution Statement
