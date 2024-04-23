@@ -229,12 +229,10 @@ ggplot(predicted_observed, aes(x = Predicted, y = Observed)) +
   geom_smooth(method = "lm", se = T, color = "blue") +  # Add this line
   labs(x = "Predicted", y = "Observed", title = "Predicted vs Observed Plot")
 
+residuals <- resid(predicted_observed)
+plot(predicted_observed)
 
-
-plot(longitudinal_model, which = 2)
-conditional_plot <- ggpredict(longitudinal_model, terms = c("age", "race"))
-
-
+plot(longitudinal_model)
 ```
 
 
