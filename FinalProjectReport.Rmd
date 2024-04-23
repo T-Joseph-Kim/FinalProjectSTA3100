@@ -15,8 +15,11 @@ style="display: block; margin: 0 auto;"}
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+install.packages("lme4", repos = "http://cran.us.r-project.org")
+install.packages("Matrix", dependencies = T, repos = "http://cran.us.r-project.org")
 library(tidyverse)
 library(dplyr)
+library(lme4)
 ```
 
 \newpage
@@ -134,8 +137,6 @@ for (i in 1:nrow(ageDeathRate)) {
   df[i, "hispanic_origin"] <- trimws(split[[1]][2])
   df[i, "death"] <- row$ESTIMATE
 }
-
-df
 ```
 
 ```{r}
@@ -149,6 +150,93 @@ df_numeric <- df %>%
 correlation_matrix <- cor(select(df_numeric, -death))
 correlation_matrix
 ```
+```{r}
+ggplot(df, aes(x = race, y = death, fill = race)) +
+  geom_boxplot() +
+    scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 3))
+
+ggplot(df, aes(x = race, y = death, fill = age)) +
+  geom_boxplot() +
+  scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
+
+
+```
+
+```{r}
+df <- na.omit(df)
+longitudinal_model <- lmer(death ~ age + sex + race + (1 | age) + (1 | sex) + (1 | race), data = df)
+summary(longitudinal_model)
+```
+
+```{r}
+races_count <- table(interaction(df$race, df$sex, df$age))
+group_df <- df %>%
+  group_by(sex, age, race, hispanic_origin) %>% 
+  summarise(
+    mean_death = mean(death, na.rm = T),
+    variance_death = var(death, na.rm = T)
+  )
+#based on 2022 US census data
+#22.68 mil / 100k = 226.8 -> male 15-24
+#21.65 mil / 100k = 216.5 -> female 15-24
+#45.31 mil / 100k = 453.1 -> male 25-44
+#43.89 mil / 100k = 438.9 -> female 25-44
+#40.94 mil / 100k = 409.4 -> male 45-64
+#41.57 mil / 100k = 415.7 -> female 45-64
+#26.03 mil / 100k = 260.3 -> male 65+
+#31.86 mil / 100k = 318.6 -> female 65+
+population_counts <- list(allRaces15.Female = 217, americanIndian15.Female = 102, asian15.Female = 121, black15.Female = 128, white15.Female = 217, allRaces25.Female = 439, americanIndian25.Female = 258, asian25.Female = 258, black25.Female = 258, white25.Female = 439, allRaces45.Female = 416, americanIndian45.Female = 110, asian45.Female = 245, black45.Female = 245, white45.Female = 245, allRaces65.Female = 319, asian65.Female = 319, black65.Female = 223, white65.Female = 542, allRaces15.Male = 227, americanIndian15.Male = 134, asian15.Male = 134, black15.Male = 134, white15.Male = 227, allRaces25.Male = 453, americanIndian25.Male = 266, asian25.Male = 266, black25.Male = 266, white25.Male = 453, allRaces45.Male = 409, americanIndian45.Male = 241, asian45.Male = 241, black45.Male = 241, white45.Male = 409,  allRaces65.Male = 260, americanIndian65.Male = 31, asian65.Male = 153, black65.Male = 153, white65.Male = 260
+)
+
+for (i in 1:nrow(group_df)) {
+  group_df$population_augment[i] <- population_counts[i]
+}
+
+augment_df <- data.frame(
+  age = character(),
+  race = character(),
+  hispanic_origin = character(),
+  sex = character(),
+  death = numeric()
+)
+
+for (i in 1:nrow(group_df)) {
+  count <- group_df$population_augment[[i]]
+  count
+  for (j in 1:count) {
+    augment_df <- rbind(augment_df, data.frame(
+      age = group_df$age[i],
+      race = group_df$race[i],
+      hispanic_origin = group_df$hispanic_origin[i],
+      sex = group_df$sex[i],
+      death = rnorm(1, mean = group_df$mean_death[i], sd = sqrt(group_df$variance_death[i]))
+    ))
+  }
+}
+```
+
+```{r}
+predicted <- predict(longitudinal_model, newdata = augment_df)
+observed <- df$death
+n_points <- length(observed)
+randomSelectPredict <- predicted[sample(length(predicted), n_points)]
+
+predicted_observed <- data.frame(Predicted = randomSelectPredict, Observed = observed)
+
+ggplot(predicted_observed, aes(x = Predicted, y = Observed)) +
+  geom_point(aes(color = "Observed"), shape = 12) +
+  geom_point(aes(color = "Predicted"), shape = 2) +
+  geom_smooth(method = "lm", se = T, color = "blue") +  # Add this line
+  labs(x = "Predicted", y = "Observed", title = "Predicted vs Observed Plot")
+
+
+
+plot(longitudinal_model, which = 2)
+conditional_plot <- ggpredict(longitudinal_model, terms = c("age", "race"))
+
+
+```
+
 
 # Conclusion
 
