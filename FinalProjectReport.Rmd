@@ -142,6 +142,13 @@ df
 anova_result <- aov(death ~ age + race + hispanic_origin + sex, data = df)
 summary(anova_result)
 ```
+```{r}
+df_numeric <- df %>%
+  mutate_if(is.character, as.factor) %>%
+  mutate_all(as.numeric)
+correlation_matrix <- cor(select(df_numeric, -death))
+correlation_matrix
+```
 
 # Conclusion
 
