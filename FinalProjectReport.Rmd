@@ -283,7 +283,6 @@ death_by_agerace <- ggplot(df, aes(x = race, y = death, fill = age)) +
   scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
 
 ggsave("death_by_AgeRace_dist.pdf", death_by_agerace)
-
 ```
 ```{=tex}
 \begin{figure}
@@ -293,7 +292,7 @@ ggsave("death_by_AgeRace_dist.pdf", death_by_agerace)
 \label{fig:figure8}
 \end{figure}
 ```
-**Distribution of Suicide Rates by Race**: reveals varying rates across different racial demographics. Notably, the American Indian or Alaska Native group exhibits the highest suicide rate overall, whereas the Asian or Pacific Islander group demonstrates the lowest.
+**Distribution of Suicide Rates by Race**: reveals varying rates across different racial demographics using a standard box and whisker plot. Notably, the American Indian or Alaska Native group exhibits the highest median suicide count with largest spread of distribution overall, whereas the Asian or Pacific Islander group demonstrates the lowest. Additionally, it's important to note that no data are normally distributed, with American Indian or Alaska Native and Asian or Pacific Islander groups being positively skewed, and Black or African American being negatively skewed. 
 ```{=tex}
 \begin{figure}
 \centering
