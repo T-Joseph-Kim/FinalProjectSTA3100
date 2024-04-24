@@ -1,8 +1,10 @@
 ---
 title: "Final Project: Analyzing Suicide Mortality Trends by Demographic Factors"
 author: "by Joseph Kim and Jun Tianzhong"
-date: "`r Sys.Date()`"
+date: "4/24/24"
 output: pdf_document
+bibliography: myreferences.bib
+csl: bibstyling.csl
 editor_options: 
   markdown: 
     wrap: 72
@@ -26,15 +28,42 @@ library(lme4)
 
 \newpage
 
+# Table of Contents
+
+## 1. Abstract ... 3
+## 2. Introduction ... 3
+## 3. Data Analysis and Results ... 4
+#### 3.1 Death Rate Summary ... 4
+#### 3.2 Cumulative Death Count ... 5
+#### 3.3 Death Rate of Hispanic Origin ... 5
+#### 3.4 Death Rate of Non-Hispanic Origin ... 6
+#### 3.5 Cumulative Death Count by Age Groups ... 6
+#### 3.6 Male vs Female Death Rates ... 7
+#### 3.7 ANOVA Test Across Demographics ... 7
+#### 3.8 Correlation Matrix ... 8
+#### 3.9 Distrbution by Race and Age Groups ... 9-10
+#### 3.10 Longitudinal Model Across Demographics ... 10-12
+## 4. Conclusion ... 13
+## 5. Team Contribution Statement ... 13
+## 6. References ... 14
+
+\newpage
+
 # Abstract
+
+|     The complicated relation between suicide rates and many demographic categories is crucial in understanding mental health challenges and bringing awareness to suicide. This study comprehensively analyzes death rates from suicide in the United States from 1950 to 2018, using data provided by the [*U.S. Department of Health & Human Services*](https://catalog.data.gov/dataset/death-rates-for-suicide-by-sex-race-hispanic-origin-and-age-united-states-020c1). By examining historical trends and identifying the significant shifts in suicide rates among different demographic groups, this research shows that age, race, and sex, can be critical predictors of mortality rates. Findings underscore the disproportionate rates of suicide among certain demographic groups, such as older age groups and specific racial populations. Highlighting the importance of considering demographic factors, this study also acknowledges limitations in the data  used. Future research should prioritize incorporating more datasets and employing more advanced techniques to analyze said data. Additionally, future research should incorporate societal factors providing more accurate findings that relate to the real world.
+
+Software Note: this study takes advantage of R, RStudio, and the TidyVerse library [@tidyverse; @RStudio; @RLang].
 
 # Introduction
 
 |     Understanding the dynamics of suicide rates across demographic categories is paramount in addressing the complexities of mental health and societal well-being. Over the decades, the United States has witnessed fluctuations in suicide rates (increased trend), influenced by a multitude of factors including societal changes, economic conditions, and mental health awareness. The exploration of these trends sheds light on the historical patterns of suicide but also guides targeted interventions and awareness to mitigate risk factors associated with suicide.
 
-|     Recent years we have seen a growing recognition of the urgency to address mental health issues, including suicide prevention, at both the nation and global level. With increasing awareness, there has been an increase in research efforts aimed to dissecting the interrelationship between demographic variables and suicide rates.This includes the examination of disparities across sex, race, Hispanic origin, and age groups, acknowledging the nuanced experiences and demographic categories that are the most vulnerable.
+|     Recent years we have seen a growing recognition of the urgency to address mental health issues, including suicide prevention, at both the nation and global level [@cdcHomepageHealth]. With increasing awareness, there has been an increase in research efforts aimed to dissecting the interrelationship between demographic variables and suicide rates.This includes the examination of disparities across sex, race, Hispanic origin, and age groups, acknowledging the nuanced experiences and demographic categories that are the most vulnerable.
 
-|     With a data set provided by the U.S. Department of Health & Human Services titled "Death rates for suicide, by sex, race, Hispanic origin, and age: United States", this study seeks to contribute to this ongoing research by comprehensively analyzing death rates for suicide in the United States spanning nearly seven decades, from 1950 to 2018. By analyzing into historical data, we aim to discern long-term trends and identify significant shifts in suicide rates among different demographic groups. Moreover, we want to uncover potential underlying factors contributing to these trends, informing targeted interventions and policy initiatives tailored to address the unique needs of diverse populations like the United States. In essence, we aspire to contribute towards fostering a society that has increased mental health awareness through this research.
+|     With a data set provided by the U.S. Department of Health & Human Services titled "Death rates for suicide, by sex, race, Hispanic origin, and age: United States", this study seeks to contribute to this ongoing research by comprehensively analyzing death rates for suicide in the United States spanning nearly seven decades, from 1950 to 2018 [@dataUSDepartment]. By analyzing into historical data, we aim to discern long-term trends and identify significant shifts in suicide rates among different demographic groups. Moreover, we want to uncover potential underlying factors contributing to these trends, informing targeted interventions and policy initiatives tailored to address the unique needs of diverse populations like the United States. In essence, we aspire to contribute towards fostering a society that has increased mental health awareness through this research.
+
+\newpage
 
 # Data Analysis & Results
 
@@ -239,7 +268,6 @@ For this correlation matrix, we see that there is no off-diagonal correlation ex
 
 In our analysis, it's essential to acknowledge that the data might not fully capture the intricate relationships between demographics due to potential missing or incomplete data. A much larger amount of data is required for a more accurate correlation matrix.
 
-\newpage
 ## Distribution by Race and Age Groups
 ```{r, echo=F, warning=F, message= F}
 death_by_race <- ggplot(df, aes(x = race, y = death, fill = race)) +
@@ -378,8 +406,18 @@ ggsave("long_model_graph.pdf", long_model_graph)
 
 
 
-Along with our longitudinal model, we augmented a new data frame using US census data collected in 2022 to estimate the population count of different demographic groups by gender. This data frame is inputted into the longitudinal model to make predictions on the death counts and used to create a "predicted vs. observed plot" as shown in \ref{fig:figure10}. From the plot, it can be clearly seen that our model has some errors in fitting the data, since the the line of best fit is close to being horizontal, indicating that on average, the model's predictions do not accurately capture the variability in the observed data across different time points or subjects. Additionally, it can be seen that there is a vertical scatter across death counts, which indicates that there are variability or inconsistency in how well they truly matched the observed values for individual data points. In retrospective, we found the reason behind such prediction errors due to both our newly augmented data frame and tested data frame lacking a time variable (augmented data frame is data from 2022 and tested data frame is a summary of data from 1980-2018, which means both data frames lack time-varying variables to represent how the predictor variables changed over time).  Additionally, this unexpected result can also be explained by our finding of the longitudinal model being heteroscedastic based on the results obtained from \ref{fig:figure11}, as the fitted vs. residual graph showing three separate clusters, wth one dense cluster and two sparser clusters at higher values, suggesting that the variance of the residuals varied across different levels of the fitted value. From our findings and the warning given by the linear mixed model fit of the predictor variables of being possibly collinear, we have come to conclude that we misrepresented the longitudinal model for prediction as it is unable to capture the true underlying relationship between the predictors and the outcome (death) due to the lack of time-varying variables in our data frames. For possible solutions to fitting this model, we considered addressing the issue of our augmented data frame lacking time-varying variables and then performing the same procedure to test for collinearity and heteroscedasticity. If similar results are obtained, we did more research on the Lasso Regression and Ridge Regression to perform regularization techniques to add penalty terms to shrink the estimated coefficients towards zero to reduce the variances of the parameter estimates and possibily mitigate the effects of collinearity. 
+Along with our longitudinal model, we augmented a new data frame using [*US census data*](https://www.statista.com/statistics/241488/population-of-the-us-by-sex-and-age/) collected in 2022 [@statistaPopulationUS] to estimate the population count of different demographic groups by gender. This data frame is inputted into the longitudinal model to make predictions on the death counts and used to create a "predicted vs. observed plot" as shown in \ref{fig:figure10}. From the plot, it can be clearly seen that our model has some errors in fitting the data, since the the line of best fit is close to being horizontal, indicating that on average, the model's predictions do not accurately capture the variability in the observed data across different time points or subjects. Additionally, it can be seen that there is a vertical scatter across death counts, which indicates that there are variability or inconsistency in how well they truly matched the observed values for individual data points. In retrospective, we found the reason behind such prediction errors due to both our newly augmented data frame and tested data frame lacking a time variable (augmented data frame is data from 2022 and tested data frame is a summary of data from 1980-2018, which means both data frames lack time-varying variables to represent how the predictor variables changed over time).  Additionally, this unexpected result can also be explained by our finding of the longitudinal model being heteroscedastic based on the results obtained from \ref{fig:figure11}, as the fitted vs. residual graph showing three separate clusters, with one dense cluster and two sparser clusters at higher values, suggesting that the variance of the residuals varied across different levels of the fitted value. From our findings and the warning given by the linear mixed model fit of the predictor variables of being possibly collinear, we have come to conclude that we misrepresented the longitudinal model for prediction as it is unable to capture the true underlying relationship between the predictors and the outcome (death) due to the lack of time-varying variables in our data frames. For possible solutions to fitting this model, we considered addressing the issue of our augmented data frame lacking time-varying variables and then performing the same procedure to test for collinearity and heteroscedasticity. If similar results are obtained, we did more research on the Lasso Regression and Ridge Regression to perform regularization techniques to add penalty terms to shrink the estimated coefficients towards zero to reduce the variances of the parameter estimates and possibly mitigate the effects of collinearity. 
 
 # Conclusion
 
+|     This study delved into the dynamics of suicide rates across demographic categories, aiming to shed light on the complex interrelationships between age, race, sex, and mortality rates in the United States. Through comprehensive analysis of a dataset that spans nearly seven decades, our finding show the significant influence of demographic factors on suicide rates. Notably, age was a significant predictor, with older age groups exhibiting higher mortality rates compared to their younger counterparts. Furthermore, racial disparities were evident, with certain racial groups experience disproportionately higher suicide rates, namely Black or African American and American Indian or Alaska Native. Additionally, our data analysis highlighted sex-based variations, indicating higher mortality rates among males compared to females. However, it is very important to interpret these findings carefully, there are potential limitations such as incomplete data and model convergence issues. Future research on topics such as these should put more resources toward incorporating time-varying variables and employing advanced modeling techniques to get accurate and better understanding results in the complex dynamics of suicide rates across demographic factors. Suicide is not a simple topic as many social attributes come into play. Shedding light onto the demographic groups related to suicide rates is an important advance of our understanding of suicide prevention and developing a society that prioritizes mental health.
+
 # Team Contribution Statement
+
+|     In our team project, Jun Tianzhong played a pivotal role in conducting comprehensive data analysis, including generating data plots, formulating a longitudinal model, and creating a predicted vs observed plot. His expertise in data analysis and graphing greatly elevated our report. Joseph Kim provided contributions to the project by primarily serving as the writer of the project. Joseph wrote the abstract, introduction, and conclusion. He also generated basic data plots, and performed the ANOVA test and correlation matrix.
+
+\newpage
+
+\begin{center}
+\textbf{References}
+\end{center}
