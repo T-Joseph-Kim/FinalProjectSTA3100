@@ -346,7 +346,7 @@ predicted_observed <- data.frame(Predicted = randomSelectPredict, Observed = obs
 pred_obs_graph <- ggplot(predicted_observed, aes(x = Predicted, y = Observed)) +
   geom_point(aes(color = "Observed"), shape = 12) +
   geom_point(aes(color = "Predicted"), shape = 2) +
-  geom_smooth(method = "lm", se = T, color = "blue") +  # Add this line
+  geom_smooth(method = "lm", se = T, color = "blue") + 
   labs(x = "Predicted", y = "Observed", title = "Predicted vs Observed Plot")
 
 ggsave("pred_obs_graph.pdf", pred_obs_graph)
@@ -356,6 +356,7 @@ ggsave("pred_obs_graph.pdf", pred_obs_graph)
 long_model_graph <- as.ggplot(plot(longitudinal_model))
 ggsave("long_model_graph.pdf", long_model_graph)
 ```
+
 ```{=tex}
 \begin{figure}
 \centering
@@ -364,6 +365,8 @@ ggsave("long_model_graph.pdf", long_model_graph)
 \label{fig:figure10}
 \end{figure}
 ```
+
+
 ```{=tex}
 \begin{figure}
 \centering
@@ -372,6 +375,11 @@ ggsave("long_model_graph.pdf", long_model_graph)
 \label{fig:figure11}
 \end{figure}
 ```
+
+
+
+Along with our longitudinal model, we augmented a new data frame using US census data collected in 2022 to estimate the population count of different demographic groups by gender. This data frame is inputted into the longitudinal model to make predictions on the death counts and used to create a "predicted vs. observed plot" as shown in \ref{fig:figure10}. From the plot, it can be clearly seen that our model has some errors in fitting the data, since the the line of best fit is close to being horizontal, indicating that on average, the model's predictions do not accurately capture the variability in the observed data across different time points or subjects. Additionally, it can be seen that there is a vertical scatter across death counts, which indicates that there are variability or inconsistency in how well they truly matched the observed values for individual data points. In retrospective, we found the reason behind such prediction errors due to both our newly augmented data frame and tested data frame lacking a time variable (augmented data frame is data from 2022 and tested data frame is a summary of data from 1980-2018, which means both data frames lack time-varying variables to represent how the predictor variables changed over time).  Additionally, this unexpected result can also be explained by our finding of the longitudinal model being heteroscedastic based on the results obtained from \ref{fig:figure11}, as the fitted vs. residual graph showing three separate clusters, wth one dense cluster and two sparser clusters at higher values, suggesting that the variance of the residuals varied across different levels of the fitted value. From our findings and the warning given by the linear mixed model fit of the predictor variables of being possibly collinear, we have come to conclude that we misrepresented the longitudinal model for prediction as it is unable to capture the true underlying relationship between the predictors and the outcome (death) due to the lack of time-varying variables in our data frames. For possible solutions to fitting this model, we considered addressing the issue of our augmented data frame lacking time-varying variables and then performing the same procedure to test for collinearity and heteroscedasticity. If similar results are obtained, we did more research on the Lasso Regression and Ridge Regression to perform regularization techniques to add penalty terms to shrink the estimated coefficients towards zero to reduce the variances of the parameter estimates and possibily mitigate the effects of collinearity. 
+
 # Conclusion
 
 # Team Contribution Statement
