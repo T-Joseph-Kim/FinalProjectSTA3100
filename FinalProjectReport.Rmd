@@ -17,6 +17,8 @@ knitr::opts_chunk$set(echo = TRUE)
 install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 install.packages("lme4", repos = "http://cran.us.r-project.org")
 install.packages("Matrix", dependencies = T, repos = "http://cran.us.r-project.org")
+install.packages("ggplotify", repos = "http://cran.us.r-project.org")
+library(ggplotify)
 library(tidyverse)
 library(dplyr)
 library(lme4)
@@ -34,9 +36,9 @@ library(lme4)
 
 |     With a data set provided by the U.S. Department of Health & Human Services titled "Death rates for suicide, by sex, race, Hispanic origin, and age: United States", this study seeks to contribute to this ongoing research by comprehensively analyzing death rates for suicide in the United States spanning nearly seven decades, from 1950 to 2018. By analyzing into historical data, we aim to discern long-term trends and identify significant shifts in suicide rates among different demographic groups. Moreover, we want to uncover potential underlying factors contributing to these trends, informing targeted interventions and policy initiatives tailored to address the unique needs of diverse populations like the United States. In essence, we aspire to contribute towards fostering a society that has increased mental health awareness through this research.
 
-# Data Analysis
+# Data Analysis & Results
 
-```{r}
+```{r include = F}
 data <- read_csv("Dataset/deathRates.csv", show_col_types = F)
 demoCategory <- unique(data$STUB_LABEL)
 ages <- unique(data$AGE)
@@ -100,12 +102,12 @@ deathRate.age <- ggplot(ageDeathRate, aes(x = AGE, y = ESTIMATE)) +
   geom_bar(stat = "identity") +
   scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
   labs(x = "Age", y = "Deaths per 100,000 Resident Population") +
-  ggtitle("Cumulative Deaths Count by Age Groups")
+  ggtitle("Cumulative Death Count by Age Groups")
 
 ggsave("ageDeath.pdf", deathRate.age)
 ```
 
-```{r}
+```{r, include = F}
 sexDeathRate <- data %>%
   filter(STUB_NAME %in% demoFactor[2])
 male_death_rates <- sexDeathRate %>%
@@ -124,6 +126,72 @@ sex_death_rate_plot <- ggplot() +
 ggsave("deathByGender.pdf", sex_death_rate_plot)
 ```
 
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{deathSummary.pdf}
+\caption{Suicide Death Rate 1960-2018}
+\label{fig:figure2}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{CumulativeDeath.pdf}
+\caption{Cumulative Death Count from Suicide in the U.S.}
+\label{fig:figure3}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{HispanicDeath.pdf}
+\caption{Suicide Rate of Hispanic Origin by Sex}
+\label{fig:figure4}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{NonHispanicDeath.pdf}
+\caption{Cumulative Death Count of Non-Hispanic Origin}
+\label{fig:figure5}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{ageDeath.pdf}
+\caption{Cumulative Death Count of Different Age Groups}
+\label{fig:figure6}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{deathByGender.pdf}
+\caption{Suicide Rates of Each Sex}
+\label{fig:figure7}
+\end{figure}
+```
+\newpage
+
+## ANOVA Test Across Demographics
+
+Testing for the difference in mean population of death rates observed
+across different age groups, races, Hispanic origins, and sexes:
+
+-   **Null Hypothesis:** $H_0:$ There are no significant differences in
+    death rates among different age groups, races, Hispanic origins, and
+    sexes.
+
+-   **Alternative Hypothesis:** $H_a:$ At least one of the factors (age,
+    race, hispanic origin, or sex) has a significant effect on death
+    rates.
+
+-   $\alpha$ = 0.05
+
+Below is a subset of data achieved for the next set of tests and forms of analysis:
 ```{r}
 df <- data.frame(age = character(), race = character(), hispanic_origin = character(), sex = character(), death = numeric())
 
@@ -141,8 +209,23 @@ for (i in 1:nrow(ageDeathRate)) {
 
 ```{r}
 anova_result <- aov(death ~ age + race + hispanic_origin + sex, data = df)
-summary(anova_result)
+anova_table <- anova(anova_result)
+print(anova_table)
+
 ```
+The ANOVA table above provides insights into the significant effects of various factors on the outcome variable, death. This analysis was conducted to understand the influence of age, race, and sex on mortality rates.
+
+**Age**: The ANOVA results indicate a significant effect of age on suicide rates (F(3, 943) = 6.9676, p < 0.001). Post-hoc tests revealed that mortality rates vary significantly across different age groups, with older age groups showing higher mortality rates compared to younger age groups.
+
+**Race**: Race also emerges as a significant predictor of suicide rates (F(4, 943) = 295.6210, p < 0.001). Subsequent analyses suggest that mortality rates differ significantly across racial groups, with certain races experiencing higher suicide rates compared to others.
+
+**Sex**: The ANOVA results demonstrate a significant effect of sex on suicide rates (F(1, 943) = 1626.3166, p < 0.001). Further examination reveals that mortality rates differ significantly between males and females, with one gender exhibiting higher mortality rates than the other.
+
+All the p-values are less than 0.001 therefore these findings underscore the importance of considering demographic factors such as age, race, and sex when examining mortality rates.
+
+## Correlation Matrix
+
+Below is the formation of a correlation matrix between the following demographics: age, race, Hispanic origin, and sex.
 ```{r}
 df_numeric <- df %>%
   mutate_if(is.character, as.factor) %>%
@@ -150,25 +233,62 @@ df_numeric <- df %>%
 correlation_matrix <- cor(select(df_numeric, -death))
 correlation_matrix
 ```
-```{r}
-ggplot(df, aes(x = race, y = death, fill = race)) +
+The correlation matrix provides insights into the relationships between various demographic variables in our dataset. Each cell in the matrix represents the correlation coefficient between two variables.
+
+For this correlation matrix, we see that there is no off-diagonal correlation except between hispanic_origin and race of a factor of 0.8044853, which is expected due to the overlap.
+
+In our analysis, it's essential to acknowledge that the data might not fully capture the intricate relationships between demographics due to potential missing or incomplete data. A much larger amount of data is required for a more accurate correlation matrix.
+
+\newpage
+## Distribution by Race and Age Groups
+```{r, echo=F, warning=F, message= F}
+death_by_race <- ggplot(df, aes(x = race, y = death, fill = race)) +
   geom_boxplot() +
+  ggtitle("Distribution of Suicide Rates by Race") +
     scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 3))
 
-ggplot(df, aes(x = race, y = death, fill = age)) +
+ggsave("death_by_race_dist.pdf", death_by_race)
+
+death_by_agerace <- ggplot(df, aes(x = race, y = death, fill = age)) +
   geom_boxplot() +
+  ggtitle("Distribution of Suicide Rates by Age Group Within Each Race") +
   scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10))
 
+ggsave("death_by_AgeRace_dist.pdf", death_by_agerace)
 
 ```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{death_by_race_dist.pdf}
+\caption{Distribution of Suicide Rates by Race}
+\label{fig:figure8}
+\end{figure}
+```
+**Distribution of Suicide Rates by Race**: reveals varying rates across different racial demographics. Notably, the American Indian or Alaska Native group exhibits the highest suicide rate overall, whereas the Asian or Pacific Islander group demonstrates the lowest.
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{death_by_AgeRace_dist.pdf}
+\caption{Distribution of Suicide Rates by Age Group Within Each Race}
+\label{fig:figure9}
+\end{figure}
+```
+**Distribution of Suicide Rates by Age Group Within Each Race**: across racial categories, the age group of 65 and older displays the highest suicide rate, particularly evident within the Asian or Pacific Islander and White demographics. Conversely, the Black or African American community shows its highest suicide rate distribution within the 25-44 age group. Furthermore, the American Indian or Alaska Native group exhibits its peak suicide rate in the 15-24 age bracket.
+\newpage
 
-```{r}
+## Longitudinal Model Across Demographics
+
+The following formulates a linear mixed-effects model to explore how demographic factors relate to suicide rates while including variations:
+```{r, message=F, warning=F}
 df <- na.omit(df)
 longitudinal_model <- lmer(death ~ age + sex + race + (1 | age) + (1 | sex) + (1 | race), data = df)
 summary(longitudinal_model)
 ```
 
-```{r}
+Considering the summary above, the model aims to account for variations within groups, capturing random variations across different ages, sexes, and races. Notably, the variance components for each grouping variable indicate considerable variability within race, age, and sex categories, suggesting heterogeneity in death rates. Regarding fixed effects, the coefficients provide estimates of the impact of each demographic factor on death rates. For instance, the positive coefficient for individuals aged 65 years and over suggests a higher death rate in this age group compared to the reference category. Additionally, the correlation of fixed effects table highlights potential collinearity issues between predictor variables. However, it's essential to note the model's convergence issues, indicated by the failure to converge due to a degenerate Hessian matrix with negative eigenvalues.
+
+```{r, include=F, message=F, warning=F}
 races_count <- table(interaction(df$race, df$sex, df$age))
 group_df <- df %>%
   group_by(sex, age, race, hispanic_origin) %>% 
@@ -215,7 +335,7 @@ for (i in 1:nrow(group_df)) {
 }
 ```
 
-```{r}
+```{r, echo=F, message=F}
 predicted <- predict(longitudinal_model, newdata = augment_df)
 observed <- df$death
 n_points <- length(observed)
@@ -223,19 +343,35 @@ randomSelectPredict <- predicted[sample(length(predicted), n_points)]
 
 predicted_observed <- data.frame(Predicted = randomSelectPredict, Observed = observed)
 
-ggplot(predicted_observed, aes(x = Predicted, y = Observed)) +
+pred_obs_graph <- ggplot(predicted_observed, aes(x = Predicted, y = Observed)) +
   geom_point(aes(color = "Observed"), shape = 12) +
   geom_point(aes(color = "Predicted"), shape = 2) +
   geom_smooth(method = "lm", se = T, color = "blue") +  # Add this line
   labs(x = "Predicted", y = "Observed", title = "Predicted vs Observed Plot")
 
-residuals <- resid(predicted_observed)
-plot(predicted_observed)
+ggsave("pred_obs_graph.pdf", pred_obs_graph)
+# residuals <- resid(predicted_observed)
+# plot(predicted_observed)
 
-plot(longitudinal_model)
+long_model_graph <- as.ggplot(plot(longitudinal_model))
+ggsave("long_model_graph.pdf", long_model_graph)
 ```
-
-
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{pred_obs_graph.pdf}
+\caption{Predicted vs Observed Plot}
+\label{fig:figure10}
+\end{figure}
+```
+```{=tex}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{long_model_graph.pdf}
+\caption{Longitudinal Model Visualization}
+\label{fig:figure11}
+\end{figure}
+```
 # Conclusion
 
 # Team Contribution Statement
